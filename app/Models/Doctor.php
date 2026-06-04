@@ -1,0 +1,26 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class Doctor extends Model
+{
+    use HasFactory;
+
+    protected $fillable = [
+        'first_name', 
+        'last_name', 
+        'specialty', 
+        'phone', 
+        'email', 
+        'license', 
+        'years_of_experience'
+    ];
+
+    public function appointments()
+    {
+        return $this->hasMany(Appointment::class);
+    }
+}
