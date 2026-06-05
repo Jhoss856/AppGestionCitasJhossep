@@ -5,7 +5,7 @@
     <div class="auth-container-card register-card">
         
         <div class="auth-form-panel" style="padding: 40px;">
-            <h2 style="border-bottom: 2px solid var(--brand-primary); padding-bottom: 12px;">Crear Cuenta en CliniSync</h2>
+            <h2 style="border-bottom: 2px solid var(--brand-primary); padding-bottom: 12px;">Crear Cuenta en SincroAgenda</h2>
             <p>Regístrate para comenzar a coordinar citas de forma automatizada.</p>
 
             <form method="POST" action="{{ route('register') }}">
@@ -24,7 +24,7 @@
 
                 <div class="modern-input-group">
                     <label>Correo Electrónico</label>
-                    <input type="email" name="email" value="{{ old('email') }}" required placeholder="juan.perez@clinisync.com">
+                    <input type="email" name="email" value="{{ old('email') }}" required placeholder="juan.perez@SincroAgenda.com">
                     @error('email') <span style="color:var(--accent-danger); font-size:0.8rem;">{{ $message }}</span> @enderror
                 </div>
 
@@ -53,42 +53,66 @@
                 </div>
             </form>
         </div>
+    </div>
 
+    <!-- EL BOT ASISTENTE INTEGRADO -->
+    <div class="sincro-bot-wrapper" id="sincro-bot">
+        <div class="bot-face" id="bot-face">👨🏻‍⚕️</div>
+        <div class="bot-tablet" id="bot-tablet">
+            <div class="tablet-screen" id="tablet-screen">Bienvenido a bordo...</div>
+        </div>
     </div>
 </div>
 
-<!-- Script del medidor adaptado a la paleta Índigo/Zafiro -->
 <script>
-    document.getElementById('passwordField').addEventListener('input', function(e) {
-        const password = e.target.value;
+    // Unificación de la lógica del medidor y la animación del bot
+    document.addEventListener("DOMContentLoaded", function() {
+        const passwordField = document.getElementById('passwordField');
         const bar = document.getElementById('meterBar');
         const text = document.getElementById('meterText');
-        let score = 0;
+        const botFace = document.getElementById('bot-face');
+        const botTablet = document.getElementById('bot-tablet');
+        const screen = document.getElementById('tablet-screen');
+        const allInputs = document.querySelectorAll('input');
 
-        if (password.length === 0) {
-            bar.style.width = '0%';
-            text.innerText = 'Seguridad: No ingresada';
-            text.style.color = 'var(--text-muted)';
-            return;
-        }
+        // Lógica de medidor de seguridad
+        passwordField.addEventListener('input', function(e) {
+            const password = e.target.value;
+            let score = 0;
+            if (password.length >= 8) score++;
+            if (/[A-Z]/.test(password) || /[0-9]/.test(password)) score++;
+            if (/[^A-Za-z0-9]/.test(password)) score++;
 
-        if (password.length >= 8) score++;
-        if (/[A-Z]/.test(password) || /[0-9]/.test(password)) score++;
-        if (/[^A-Za-z0-9]/.test(password)) score++;
+            if (password.length === 0) {
+                bar.style.width = '0%';
+                text.innerText = 'Seguridad: No ingresada';
+            } else if (score <= 1) {
+                bar.style.width = '33%'; bar.style.backgroundColor = 'var(--accent-danger)';
+                text.innerText = 'Seguridad: Débil';
+            } else if (score === 2) {
+                bar.style.width = '66%'; bar.style.backgroundColor = 'var(--accent-warning)';
+                text.innerText = 'Seguridad: Media';
+            } else {
+                bar.style.width = '100%'; bar.style.backgroundColor = 'var(--accent-success)';
+                text.innerText = 'Seguridad: Alta ¡Excelente!';
+            }
+        });
 
-        if (score <= 1) {
-            bar.style.width = '33%'; bar.style.backgroundColor = 'var(--accent-danger)';
-            text.innerText = 'Seguridad: Débil (Permitido de igual forma)';
-            text.style.color = 'var(--accent-danger)';
-        } else if (score === 2) {
-            bar.style.width = '66%'; bar.style.backgroundColor = 'var(--accent-warning)';
-            text.innerText = 'Seguridad: Media';
-            text.style.color = '#d97706';
-        } else {
-            bar.style.width = '100%'; bar.style.backgroundColor = 'var(--accent-success)';
-            text.innerText = 'Seguridad: Alta ¡Excelente!';
-            text.style.color = 'var(--accent-success)';
-        }
+        // Lógica de animación del bot al interactuar con cualquier campo
+        allInputs.forEach(input => {
+            input.addEventListener('input', function() {
+                botTablet.classList.add('state-writing');
+                botFace.innerText = "👨🏻‍💻";
+                screen.innerText = "Registrando: " + input.name + "...";
+                
+                clearTimeout(window.botTimer);
+                window.botTimer = setTimeout(() => {
+                    botTablet.classList.remove('state-writing');
+                    botFace.innerText = "👨🏻‍⚕️";
+                    screen.innerText = "SincroAgenda: Registro";
+                }, 1500);
+            });
+        });
     });
 </script>
 @endsection

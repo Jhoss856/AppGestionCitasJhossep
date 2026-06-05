@@ -33,7 +33,7 @@
 
                 <div class="modern-input-group">
                     <label for="email">Correo Electrónico</label>
-                    <input id="email" type="email" name="email" value="{{ old('email') }}" required autocomplete="email" autofocus placeholder="ejemplo@clinisync.com">
+                    <input id="email" type="email" name="email" value="{{ old('email') }}" required autocomplete="email" autofocus placeholder="ejemplo@SincroAgenda.com">
                     @error('email') 
                         <span style="color: var(--accent-danger); font-size: 0.8rem; margin-top: 4px; display: block;">
                             {{ $message }}

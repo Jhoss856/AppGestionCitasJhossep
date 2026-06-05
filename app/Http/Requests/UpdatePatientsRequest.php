@@ -8,7 +8,7 @@ class UpdatePatientsRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return true;
+        return true; // Permitir que se ejecute la validación
     }
 
     public function rules(): array

@@ -1,28 +1,40 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container">
-    <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="card">
-                <div class="card-header">{{ __('Verify Your Email Address') }}</div>
+<div class="simple-auth-wrapper">
+    <div class="simple-auth-card">
 
-                <div class="card-body">
-                    @if (session('resent'))
-                        <div class="alert alert-success" role="alert">
-                            {{ __('A fresh verification link has been sent to your email address.') }}
-                        </div>
-                    @endif
+        <div class="card-icon">✉️</div>
 
-                    {{ __('Before proceeding, please check your email for a verification link.') }}
-                    {{ __('If you did not receive the email') }},
-                    <form class="d-inline" method="POST" action="{{ route('verification.resend') }}">
-                        @csrf
-                        <button type="submit" class="btn btn-link p-0 m-0 align-baseline">{{ __('click here to request another') }}</button>.
-                    </form>
-                </div>
+        <h2>Verifica tu Correo</h2>
+        <p>Antes de continuar, revisa tu bandeja de entrada. Te enviamos un enlace de verificación.</p>
+
+        @if (session('resent'))
+            <div class="alert-success">
+                ✓ Se envió un nuevo enlace a tu dirección de correo electrónico.
             </div>
+        @endif
+
+        <div class="alert-info">
+            ¿No recibiste el correo? Revisa tu carpeta de spam o solicita uno nuevo.
         </div>
+
+        <form method="POST" action="{{ route('verification.resend') }}">
+            @csrf
+            <button type="submit" class="btn-auth-primary" style="margin-bottom: 16px;">
+                Reenviar Enlace de Verificación
+            </button>
+        </form>
+
+        <p style="text-align: center; font-size: 0.85rem; margin: 0;">
+            <a href="{{ route('logout') }}"
+               onclick="event.preventDefault(); document.getElementById('logout-verify-form').submit();"
+               class="forgot-link">Salir del sistema</a>
+        </p>
+        <form id="logout-verify-form" action="{{ route('logout') }}" method="POST" style="display: none;">
+            @csrf
+        </form>
+
     </div>
 </div>
 @endsection

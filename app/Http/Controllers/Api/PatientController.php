@@ -5,47 +5,82 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Patient;
 use App\Http\Requests\StorePatientsRequest;
-use App\Http\Requests\UpdatePatientsRequest;
+use App\Http\Requests\UpdatePatientsRequest; // Arreglado a Plural para que coincida con tu archivo
 use App\Http\Resources\PatientsResource;
+use Illuminate\Http\Request;
 
 class PatientController extends Controller
 {
-    // INDEX: Ordenado alfabéticamente por apellido
-    public function index()
+    // Listar pacientes
+    public function index(Request $request)
     {
-        $patients = Patient::orderBy('last_name', 'asc')->get();
+        $patients = Patient::all();
 
+        // SI ES WEB: Devolvemos tu vista premium con la tabla
+        if (!$request->wantsJson()) {
+            return view('patients.index', compact('patients'));
+        }
+
+        // SI ES API: Devolvemos el Resource con JSON tradicional
         return PatientsResource::collection($patients);
     }
 
+    // Registrar Paciente
     public function store(StorePatientsRequest $request)
     {
         $patient = Patient::create($request->validated());
 
+        // SI ES WEB: Redirecciona de vuelta a la tabla con el Toast de éxito
+        if (!$request->wantsJson()) {
+            return redirect()->to('/patients')->with('success', 'Paciente inscrito de forma exitosa');
+        }
+
+        // SI ES API: Devuelve la respuesta de la API
         return response()->json([
             'message' => 'Paciente registrado exitosamente',
-            'data'    => new PatientsResource($patient)
+            'data' => new PatientsResource($patient)
         ], 201);
     }
 
-    public function show(Patient $patient)
+    // ¡NUEVO! Muestra el formulario de edición en la Web
+    public function edit($id)
     {
-        return new PatientsResource($patient);
+        $patient = Patient::findOrFail($id);
+        return view('patients.edit', compact('patient'));
     }
 
-    public function update(UpdatePatientsRequest $request, Patient $patient)
+    // Actualizar Paciente
+    public function update(UpdatePatientsRequest $request, $id) // Corregido el tipo a UpdatePatientsRequest
     {
+        $patient = Patient::findOrFail($id);
         $patient->update($request->validated());
 
+        // SI ES WEB: Redirecciona de forma tradicional limpiando la pantalla
+        if (!$request->wantsJson()) {
+            return redirect()->to('/patients')->with('success', 'Paciente actualizado correctamente');
+        }
+
+        // SI ES API: Respuesta JSON habitual
         return response()->json([
             'message' => 'Paciente actualizado correctamente',
-            'data'    => new PatientsResource($patient)
+            'data' => new PatientsResource($patient)
         ], 200);
     }
 
-    public function destroy(Patient $patient)
+    // ¡NUEVO! Eliminar Paciente
+    public function destroy(Request $request, $id)
     {
+        $patient = Patient::findOrFail($id);
         $patient->delete();
-        return response()->json(['message' => 'Deleted successfully']);
+
+        // SI ES WEB: Redirecciona a la tabla con mensaje
+        if (!$request->wantsJson()) {
+            return redirect()->to('/patients')->with('success', 'Registro eliminado correctamente');
+        }
+
+        // SI ES API: Respuesta JSON
+        return response()->json([
+            'message' => 'Paciente eliminado correctamente'
+        ], 200);
     }
 }

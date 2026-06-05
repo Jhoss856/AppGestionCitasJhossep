@@ -2,59 +2,63 @@
 
 @section('content')
 
+@if(session('success'))
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            window.showToast("{{ session('success') }}", 'success');
+        });
+    </script>
+@endif
+
 <div class="action-header">
     <h2 class="page-title">Gestión de Pacientes</h2>
     <div>
-    <a href="/home" class="btn-primary-custom" style="background-color: #64748b; margin-right: 10px;">Volver</a>
+        <a href="/home" class="btn-primary-custom" style="background-color: #64748b; margin-right: 10px;">Volver</a>
         <button class="btn-primary-custom" onclick="toggleFormPanel()">Alternar Formulario</button>
     </div>
 </div>
 
-<div id="formPanel" class="form-card" style="{{ isset($editPatient) ? 'display: block;' : 'display: none;' }}">
-    <h3 class="form-title">
-        {{ isset($editPatient) ? 'Modificar Registro del Paciente' : 'Inscribir Nuevo Paciente' }}
-    </h3>
+<div id="formPanel" class="form-card" style="display: none;">
+    <h3 class="form-title">Inscribir Nuevo Paciente</h3>
     
-    <form action="{{ isset($editPatient) ? route('patients.update', $editPatient->id) : route('patients.store') }}" method="POST">
+    <form action="{{ route('patients.store') }}" method="POST">
         @csrf
-        @if(isset($editPatient)) @method('PUT') @endif
-
         <div class="inputs-layout">
             <div class="input-block">
                 <label>Nombre Completo</label>
-                <input type="text" name="first_name" value="{{ $editPatient->first_name ?? '' }}" required>
+                <input type="text" name="first_name" required>
             </div>
             <div class="input-block">
                 <label>Apellidos</label>
-                <input type="text" name="last_name" value="{{ $editPatient->last_name ?? '' }}" required>
+                <input type="text" name="last_name" required>
             </div>
             <div class="input-block">
                 <label>Fecha de Nacimiento</label>
-                <input type="date" name="date_of_birth" value="{{ $editPatient->date_of_birth ?? '' }}" required>
+                <input type="date" name="date_of_birth" required>
             </div>
             <div class="input-block">
                 <label>Género</label>
                 <select name="gender">
-                    <option value="Masculino" {{ (isset($editPatient) && $editPatient->gender == 'Masculino') ? 'selected' : '' }}>Masculino</option>
-                    <option value="Femenino" {{ (isset($editPatient) && $editPatient->gender == 'Femenino') ? 'selected' : '' }}>Femenino</option>
+                    <option value="Masculino">Masculino</option>
+                    <option value="Femenino">Femenino</option>
                 </select>
             </div>
             <div class="input-block">
                 <label>Teléfono Móvil</label>
-                <input type="text" name="phone" value="{{ $editPatient->phone ?? '' }}">
+                <input type="text" name="phone">
             </div>
             <div class="input-block">
                 <label>Domicilio</label>
-                <input type="text" name="address" value="{{ $editPatient->address ?? '' }}">
+                <input type="text" name="address">
             </div>
             <div class="input-block">
                 <label>Grupo Sanguíneo</label>
-                <input type="text" name="blood_type" value="{{ $editPatient->blood_type ?? '' }}" placeholder="Ej: A+">
+                <input type="text" name="blood_type" placeholder="Ej: A+">
             </div>
         </div>
 
         <div class="form-buttons">
-            <button type="button" class="btn-action" style="background:#cbd5e1; color:#334155;" onclick="toggleFormPanel()">Cerrar</button>
+            <button type="button" class="btn-action" style="background:#cbd5e1; color:#334155;" onclick="toggleFormPanel()">Cancelar</button>
             <button type="submit" class="btn-primary-custom">Procesar Datos</button>
         </div>
     </form>
@@ -86,8 +90,8 @@
                 <td><span class="badge-blood">{{ $patient->blood_type ?? 'N/A' }}</span></td>
                 <td>
                     <div class="row-actions">
-                        <a href="/patients/{{ $patient->id }}/edit" class="btn-action act-edit">Editar</a>
-                        <form action="/patients/{{ $patient->id }}" method="POST" style="display:inline;">
+                        <a href="{{ route('patients.edit', $patient->id) }}" class="btn-action act-edit">Editar</a>
+                        <form action="{{ route('patients.destroy', $patient->id) }}" method="POST" style="display:inline;">
                             @csrf @method('DELETE')
                             <button type="submit" class="btn-action act-delete" onclick="return confirm('¿Retirar este registro del sistema?')">Eliminar</button>
                         </form>
