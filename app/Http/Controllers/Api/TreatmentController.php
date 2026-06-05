@@ -4,53 +4,76 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Treatment;
-use App\Http\Requests\StoreTreatmentsRequest;
-use App\Http\Requests\UpdateTreatmentsRequest;
-use App\Http\Resources\TreatmentsResource;
+use App\Models\Diagnosis;
+use App\Models\Doctor;
 use Illuminate\Http\Request;
 
 class TreatmentController extends Controller
 {
-    // Función para mostrar la lista (Web y API)
+    // Listar todos los tratamientos en la tabla web
     public function index(Request $request)
     {
-        $treatments = Treatment::orderBy('id', 'desc')->get();
+        $treatments = Treatment::with(['diagnosis', 'doctor'])->orderBy('id', 'desc')->get();
+        $diagnoses = Diagnosis::orderBy('id', 'desc')->get();
+        $doctors = Doctor::orderBy('id', 'desc')->get();
 
-        if (!$request->wantsJson()) {
-            // Retorna la vista si la petición es del navegador
-            return view('treatments.index', compact('treatments'));
-        }
-
-        // Retorna JSON si es una petición de API
-        return TreatmentsResource::collection($treatments);
+        return view('treatments.index', compact('treatments', 'diagnoses', 'doctors'));
     }
 
-    // Guardar nuevo tratamiento
-    public function store(StoreTreatmentsRequest $request)
+    // Registrar un nuevo tratamiento
+    public function store(Request $request)
     {
-        Treatment::create($request->validated());
-        return redirect()->to('/treatments')->with('success', 'Tratamiento registrado con éxito.');
+        $request->validate([
+            'name' => 'required|string|max:150',
+            'description' => 'nullable|string',
+            'duration' => 'required|string|max:100',
+            'diagnosis_id' => 'required|exists:diagnoses,id',
+            'doctor_id' => 'required|exists:doctors,id',
+            'status' => 'required|string|max:50',
+            'administration_frequency' => 'required|string|max:100',
+        ]);
+
+        Treatment::create($request->all());
+
+        return redirect()->route('treatments.index')->with('success', 'Tratamiento registrado con éxito.');
     }
 
     // Cargar formulario de edición
     public function edit($id)
     {
         $treatment = Treatment::findOrFail($id);
-        return view('treatments.edit', compact('treatment'));
+        $diagnoses = Diagnosis::orderBy('id', 'desc')->get();
+        $doctors = Doctor::orderBy('id', 'desc')->get(); // Garantiza el envío de médicos a la vista
+        
+        return view('treatments.edit', compact('treatment', 'diagnoses', 'doctors'));
     }
 
-    // Actualizar registro
-    public function update(UpdateTreatmentsRequest $request, $id)
+    // Guardar los cambios editados en HeidiSQL
+    public function update(Request $request, $id)
     {
         $treatment = Treatment::findOrFail($id);
-        $treatment->update($request->validated());
-        return redirect()->to('/treatments')->with('success', 'Tratamiento actualizado.');
+        
+        $request->validate([
+            'name' => 'required|string|max:150',
+            'description' => 'nullable|string',
+            'duration' => 'required|string|max:100',
+            'diagnosis_id' => 'required|exists:diagnoses,id',
+            'doctor_id' => 'required|exists:doctors,id',
+            'status' => 'required|string|max:50',
+            'administration_frequency' => 'required|string|max:100',
+        ]);
+
+        $treatment->update($request->all());
+
+        return redirect()->route('treatments.index')->with('success', 'Tratamiento actualizado correctamente.');
     }
 
-    // Eliminar registro
-    public function destroy(Request $request, $id)
+    // Borrar un registro de la tabla
+    public function destroy($id)
     {
-        Treatment::findOrFail($id)->delete();
-        return redirect()->to('/treatments')->with('success', 'Tratamiento eliminado correctamente.');
+        $treatment = Treatment::findOrFail($id);
+        $treatment->delete();
+
+        return redirect()->route('treatments.index')->with('success', 'Tratamiento eliminado correctamente.');
     }
 }

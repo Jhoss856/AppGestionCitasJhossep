@@ -9,23 +9,26 @@ class Treatment extends Model
 {
     use HasFactory;
 
+    // Activamos todas las columnas requeridas por su migración
     protected $fillable = [
-        'name', 
-        'description', 
-        'duration', 
-        'diagnosis_id', 
-        'doctor_id', 
-        'status', 
-        'administration_frequency'
+        'name',
+        'description',
+        'duration',
+        'diagnosis_id',
+        'doctor_id',
+        'status',
+        'administration_frequency',
     ];
 
+    // Relación limpia con el diagnóstico
     public function diagnosis()
     {
-        return $this->belongsTo(Diagnosis::class);
+        return $this->belongsTo(Diagnosis::class, 'diagnosis_id');
     }
 
-    public function medications()
+    // Relación limpia con el médico asignado
+    public function doctor()
     {
-        return $this->hasMany(Medication::class);
+        return $this->belongsTo(Doctor::class, 'doctor_id');
     }
 }

@@ -5,10 +5,12 @@ use App\Http\Controllers\Api\PatientController;
 use App\Http\Controllers\Api\DoctorController;
 use App\Http\Controllers\Api\AppointmentController;
 use App\Http\Controllers\Api\DiagnosisController;
+use App\Http\Controllers\Api\TreatmentController; 
 
 Route::get('/', function () {
     return view('welcome');
-});
+
+}); 
 
 Auth::routes();
 
@@ -36,7 +38,6 @@ Route::get('/login/github/callback', [\App\Http\Controllers\Auth\LoginController
 Route::get('/patients', [PatientController::class, 'index'])->name('patients.index');
 Route::post('/patients', [PatientController::class, 'store'])->name('patients.store');
 Route::delete('/patients/{id}', [PatientController::class, 'destroy'])->name('patients.destroy');
-//
 Route::get('/patients/{id}/edit', [PatientController::class, 'edit'])->name('patients.edit');
 Route::put('/patients/{id}', [PatientController::class, 'update'])->name('patients.update');
 
@@ -50,9 +51,8 @@ Route::put('/doctors/{id}', [DoctorController::class, 'update'])->name('doctors.
 Route::delete('/doctors/{id}', [DoctorController::class, 'destroy'])->name('doctors.destroy');
 
 // =========================================================================
-// GESTIÓN DE CITAS MÉDICAS (Sincronizado con su Clase Real)
+// GESTIÓN DE CITAS MÉDICAS
 // =========================================================================
-
 Route::get('/appointments', [AppointmentController::class, 'index'])->name('appointments.index');
 Route::post('/appointments', [AppointmentController::class, 'store'])->name('appointments.store');
 Route::get('/appointments/{id}/edit', [AppointmentController::class, 'edit'])->name('appointments.edit');
@@ -69,12 +69,10 @@ Route::put('/diagnoses/{id}', [DiagnosisController::class, 'update'])->name('dia
 Route::delete('/diagnoses/{id}', [DiagnosisController::class, 'destroy'])->name('diagnoses.destroy');
 
 // =========================================================================
-// GESTIÓN DE TRATAMIENTOS
+// GESTIÓN DE TRATAMIENTOS (Solución al error del nombre de la ruta)
 // =========================================================================
-Route::get('/treatments', [App\Http\Controllers\Api\TreatmentController::class, 'index'])->name('treatments.index');
-Route::post('/treatments', [App\Http\Controllers\Api\TreatmentController::class, 'store'])->name('treatments.store');
-Route::get('/treatments/{id}/edit', [App\Http\Controllers\Api\TreatmentController::class, 'edit'])->name('treatments.edit');
-Route::put('/treatments/{id}', [App\Http\Controllers\Api\TreatmentController::class, 'update'])->name('treatments.update');
-Route::delete('/treatments/{id}', [App\Http\Controllers\Api\TreatmentController::class, 'destroy'])->name('treatments.destroy');
-// En routes/web.php
-Route::resource('treatments', \App\Http\Controllers\Api\TreatmentController::class);
+Route::get('/treatments', [TreatmentController::class, 'index'])->name('treatments.index');
+Route::post('/treatments', [TreatmentController::class, 'store'])->name('treatments.store');
+Route::get('/treatments/{id}/edit', [TreatmentController::class, 'edit'])->name('treatments.edit');
+Route::put('/treatments/{id}', [TreatmentController::class, 'update'])->name('treatments.update');
+Route::delete('/treatments/{id}', [TreatmentController::class, 'destroy'])->name('treatments.destroy');

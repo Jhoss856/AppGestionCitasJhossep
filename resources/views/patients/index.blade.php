@@ -2,115 +2,178 @@
 
 @section('content')
 
+{{--
+|--------------------------------------------------------------------------
+| patients/index.blade.php
+| Lista completa de pacientes + formulario de alta colapsable
+|--------------------------------------------------------------------------
+--}}
+
 @if(session('success'))
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             window.showToast("{{ session('success') }}", 'success');
         });
     </script>
 @endif
 
-<div class="action-header">
-    <h2 class="page-title">Gestión de Pacientes</h2>
-    <div>
-        <a href="/home" class="btn-primary-custom" style="background-color: #64748b; margin-right: 10px;">Volver</a>
-        <button class="btn-primary-custom" onclick="toggleFormPanel()">Alternar Formulario</button>
+{{-- ── Page header ──────────────────────────────────────────────── --}}
+<div class="page-header">
+    <div class="page-header__left">
+        <span class="page-eyebrow">Módulo</span>
+        <h1 class="page-title">Pacientes</h1>
+    </div>
+    <div class="page-header__actions">
+        <a href="/home" class="btn btn-secondary">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M19 12H5M12 5l-7 7 7 7"/>
+            </svg>
+            Volver
+        </a>
+        <button class="btn btn-primary" onclick="togglePanel('formPanel')">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M12 5v14M5 12h14"/>
+            </svg>
+            Nuevo paciente
+        </button>
     </div>
 </div>
 
-<div id="formPanel" class="form-card" style="display: none;">
-    <h3 class="form-title">Inscribir Nuevo Paciente</h3>
-    
-    <form action="{{ route('patients.store') }}" method="POST">
-        @csrf
-        <div class="inputs-layout">
-            <div class="input-block">
-                <label>Nombre Completo</label>
-                <input type="text" name="first_name" required>
-            </div>
-            <div class="input-block">
-                <label>Apellidos</label>
-                <input type="text" name="last_name" required>
-            </div>
-            <div class="input-block">
-                <label>Fecha de Nacimiento</label>
-                <input type="date" name="date_of_birth" required>
-            </div>
-            <div class="input-block">
-                <label>Género</label>
-                <select name="gender">
-                    <option value="Masculino">Masculino</option>
-                    <option value="Femenino">Femenino</option>
-                </select>
-            </div>
-            <div class="input-block">
-                <label>Teléfono Móvil</label>
-                <input type="text" name="phone">
-            </div>
-            <div class="input-block">
-                <label>Domicilio</label>
-                <input type="text" name="address">
-            </div>
-            <div class="input-block">
-                <label>Grupo Sanguíneo</label>
-                <input type="text" name="blood_type" placeholder="Ej: A+">
-            </div>
-        </div>
+{{-- ── Formulario de alta colapsable ───────────────────────────── --}}
+<div id="formPanel" class="form-panel">
+    <div class="card" style="margin-bottom: 0;">
+        <p class="card__title">Registrar nuevo paciente</p>
 
-        <div class="form-buttons">
-            <button type="button" class="btn-action" style="background:#cbd5e1; color:#334155;" onclick="toggleFormPanel()">Cancelar</button>
-            <button type="submit" class="btn-primary-custom">Procesar Datos</button>
-        </div>
-    </form>
+        <form action="{{ route('patients.store') }}" method="POST">
+            @csrf
+            <div class="form-grid">
+
+                <div class="form-group">
+                    <label class="form-label" for="p_first_name">Nombre(s)</label>
+                    <input class="form-control" type="text" id="p_first_name"
+                           name="first_name" placeholder="Ej: Ana Lucía" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="p_last_name">Apellidos</label>
+                    <input class="form-control" type="text" id="p_last_name"
+                           name="last_name" placeholder="Ej: Ríos Vásquez" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="p_dob">Fecha de nacimiento</label>
+                    <input class="form-control" type="date" id="p_dob"
+                           name="date_of_birth" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="p_gender">Género</label>
+                    <select class="form-control" id="p_gender" name="gender">
+                        <option value="Masculino">Masculino</option>
+                        <option value="Femenino">Femenino</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="p_phone">Teléfono</label>
+                    <input class="form-control" type="text" id="p_phone"
+                           name="phone" placeholder="Ej: 987 654 321">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="p_blood">Grupo sanguíneo</label>
+                    <input class="form-control" type="text" id="p_blood"
+                           name="blood_type" placeholder="Ej: O+">
+                </div>
+
+                <div class="form-group span-2">
+                    <label class="form-label" for="p_address">Domicilio</label>
+                    <input class="form-control" type="text" id="p_address"
+                           name="address" placeholder="Av. Principal 123, Lima">
+                </div>
+
+            </div>
+
+            <div class="form-actions">
+                <button type="button" class="btn btn-secondary"
+                        onclick="togglePanel('formPanel')">Cancelar</button>
+                <button type="submit" class="btn btn-primary">Guardar paciente</button>
+            </div>
+        </form>
+    </div>
 </div>
 
-<div class="table-container">
-    <table class="modern-table">
+{{-- ── Tabla de pacientes ───────────────────────────────────────── --}}
+<div class="table-wrap">
+    <table class="data-table" aria-label="Lista de pacientes">
         <thead>
             <tr>
-                <th>Código ID</th>
+                <th>ID</th>
                 <th>Paciente</th>
-                <th>F. Nacimiento</th>
+                <th>Nacimiento</th>
                 <th>Género</th>
-                <th>Contacto</th>
-                <th>Dirección</th>
+                <th>Teléfono</th>
+                <th>Domicilio</th>
                 <th>Sangre</th>
-                <th>Acciones del Sistema</th>
+                <th>Acciones</th>
             </tr>
         </thead>
         <tbody>
             @forelse($patients as $patient)
             <tr>
-                <td><strong>#{{ $patient->id }}</strong></td>
-                <td>{{ $patient->first_name }} {{ $patient->last_name }}</td>
-                <td>{{ $patient->date_of_birth }}</td>
-                <td>{{ $patient->gender }}</td>
-                <td>{{ $patient->phone ?? 'Sin número' }}</td>
-                <td>{{ $patient->address ?? 'No registrada' }}</td>
-                <td><span class="badge-blood">{{ $patient->blood_type ?? 'N/A' }}</span></td>
+                <td>
+                    <span class="mono text-muted">#{{ $patient->id }}</span>
+                </td>
+                <td style="font-weight:500; color:var(--text-1);">
+                    {{ $patient->first_name }} {{ $patient->last_name }}
+                </td>
+                <td class="text-muted">
+                    {{ \Carbon\Carbon::parse($patient->date_of_birth)->format('d/m/Y') }}
+                </td>
+                <td class="text-muted">{{ $patient->gender }}</td>
+                <td class="text-muted">
+                    {{ $patient->phone ?? '—' }}
+                </td>
+                <td class="text-muted" style="max-width:160px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                    {{ $patient->address ?? '—' }}
+                </td>
+                <td>
+                    @if($patient->blood_type)
+                        <span class="badge badge-red">{{ $patient->blood_type }}</span>
+                    @else
+                        <span class="text-faint">N/A</span>
+                    @endif
+                </td>
                 <td>
                     <div class="row-actions">
-                        <a href="{{ route('patients.edit', $patient->id) }}" class="btn-action act-edit">Editar</a>
-                        <form action="{{ route('patients.destroy', $patient->id) }}" method="POST" style="display:inline;">
-                            @csrf @method('DELETE')
-                            <button type="submit" class="btn-action act-delete" onclick="return confirm('¿Retirar este registro del sistema?')">Eliminar</button>
+                        <a href="{{ route('patients.edit', $patient->id) }}"
+                           class="btn btn-secondary" style="padding:5px 11px; font-size:0.78rem;">
+                            Editar
+                        </a>
+                        <form action="{{ route('patients.destroy', $patient->id) }}"
+                              method="POST" style="display:inline;">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="btn btn-danger"
+                                    style="padding:5px 11px; font-size:0.78rem;"
+                                    onclick="return confirm('¿Eliminar este paciente del sistema?')">
+                                Eliminar
+                            </button>
                         </form>
                     </div>
                 </td>
             </tr>
             @empty
             <tr>
-                <td colspan="8" style="text-align: center; color: var(--text-muted); padding: 30px;">La base de datos se encuentra vacía.</td>
+                <td class="td-empty" colspan="8">
+                    No hay pacientes registrados todavía.
+                </td>
             </tr>
             @endforelse
         </tbody>
     </table>
 </div>
 
-<script>
-    function toggleFormPanel() {
-        var panel = document.getElementById('formPanel');
-        panel.style.display = (panel.style.display === 'none' || panel.style.display === '') ? 'block' : 'none';
-    }
-</script>
 @endsection

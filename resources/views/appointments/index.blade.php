@@ -2,142 +2,208 @@
 
 @section('content')
 
+{{--
+|--------------------------------------------------------------------------
+| appointments/index.blade.php
+| Gestión de citas médicas
+|--------------------------------------------------------------------------
+--}}
+
 @if(session('success'))
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             window.showToast("{{ session('success') }}", 'success');
         });
     </script>
 @endif
 
-<div class="action-header">
-    <h2 class="page-title">Gestión de Citas Médicas</h2>
-    <div>
-        <a href="/home" class="btn-primary-custom" style="background-color: #64748b; margin-right: 10px; text-decoration: none; display: inline-flex; align-items: center;">Volver</a>
-        <button class="btn-primary-custom" onclick="toggleFormPanel()">Agendar Nueva Cita</button>
+{{-- ── Page header ──────────────────────────────────────────────── --}}
+<div class="page-header">
+    <div class="page-header__left">
+        <span class="page-eyebrow">Módulo</span>
+        <h1 class="page-title">Citas médicas</h1>
+    </div>
+    <div class="page-header__actions">
+        <a href="/home" class="btn btn-secondary">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M19 12H5M12 5l-7 7 7 7"/>
+            </svg>
+            Volver
+        </a>
+        <button class="btn btn-primary" onclick="togglePanel('formPanel')">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M12 5v14M5 12h14"/>
+            </svg>
+            Agendar cita
+        </button>
     </div>
 </div>
 
-<div id="formPanel" class="form-card" style="display: none;">
-    <h3 class="form-title">Inscribir Nueva Cita</h3>
-    
-    <form action="{{ route('appointments.store') }}" method="POST">
-        @csrf
-        <div class="inputs-layout">
-            <div class="input-block">
-                <label>Paciente Solicitante</label>
-                <select name="patient_id" required style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #cbd5e1;">
-                    <option value="">-- Seleccione un paciente --</option>
-                    @foreach($patients as $patient)
-                        <option value="{{ $patient->id }}">{{ $patient->last_name }}, {{ $patient->first_name }}</option>
-                    @endforeach
-                </select>
+{{-- ── Formulario de alta ───────────────────────────────────────── --}}
+<div id="formPanel" class="form-panel">
+    <div class="card" style="margin-bottom:0;">
+        <p class="card__title">Registrar nueva cita</p>
+
+        <form action="{{ route('appointments.store') }}" method="POST">
+            @csrf
+            <div class="form-grid">
+
+                <div class="form-group">
+                    <label class="form-label" for="a_patient">Paciente</label>
+                    <select class="form-control" id="a_patient" name="patient_id" required>
+                        <option value="">— Seleccione un paciente —</option>
+                        @foreach($patients as $patient)
+                            <option value="{{ $patient->id }}">
+                                {{ $patient->last_name }}, {{ $patient->first_name }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="a_doctor">Médico especialista</label>
+                    <select class="form-control" id="a_doctor" name="doctor_id" required>
+                        <option value="">— Seleccione un especialista —</option>
+                        @foreach($doctors as $doctor)
+                            <option value="{{ $doctor->id }}">
+                                Dr(a). {{ $doctor->last_name }}, {{ $doctor->first_name }}
+                                ({{ $doctor->specialty }})
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="a_date">Fecha y hora</label>
+                    <input class="form-control" type="datetime-local"
+                           id="a_date" name="appointment_date" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="a_room">Consultorio / Sala</label>
+                    <input class="form-control" type="text" id="a_room"
+                           name="room" placeholder="Ej: Consultorio 304" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="a_status">Estado inicial</label>
+                    <select class="form-control" id="a_status" name="status" required>
+                        <option value="Pending">Pendiente</option>
+                        <option value="Confirmed">Confirmada</option>
+                        <option value="Canceled">Cancelada</option>
+                    </select>
+                </div>
+
+                <div class="form-group span-2">
+                    <label class="form-label" for="a_reason">Motivo de la consulta</label>
+                    <input class="form-control" type="text" id="a_reason"
+                           name="reason" placeholder="Ej: Control post-operatorio" required>
+                </div>
+
+                <div class="form-group span-2">
+                    <label class="form-label" for="a_notes">Notas clínicas (opcional)</label>
+                    <textarea class="form-control" id="a_notes" name="notes"
+                              rows="2"
+                              placeholder="Síntomas reportados o indicaciones previas..."></textarea>
+                </div>
+
             </div>
 
-            <div class="input-block">
-                <label>Médico Especialista</label>
-                <select name="doctor_id" required style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #cbd5e1;">
-                    <option value="">-- Seleccione un especialista --</option>
-                    @foreach($doctors as $doctor)
-                        <option value="{{ $doctor->id }}">Dr(a). {{ $doctor->last_name }}, {{ $doctor->first_name }} ({{ $doctor->specialty }})</option>
-                    @endforeach
-                </select>
+            <div class="form-actions">
+                <button type="button" class="btn btn-secondary"
+                        onclick="togglePanel('formPanel')">Cancelar</button>
+                <button type="submit" class="btn btn-primary">Guardar cita</button>
             </div>
-
-            <div class="input-block">
-                <label>Fecha y Hora Programada</label>
-                <input type="datetime-local" name="appointment_date" required>
-            </div>
-
-            <div class="input-block">
-                <label>Consultorio / Sala</label>
-                <input type="text" name="room" placeholder="Ej: Consultorio 304" required>
-            </div>
-
-            <div class="input-block" style="grid-column: span 2;">
-                <label>Motivo de la Consulta</label>
-                <input type="text" name="reason" placeholder="Ej: Control de rutina post operatorio" required>
-            </div>
-
-            <div class="input-block">
-                <label>Estado Inicial</label>
-                <select name="status" required style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #cbd5e1;">
-                    <option value="Pending">Pendiente</option>
-                    <option value="Confirmed">Confirmada</option>
-                    <option value="Canceled">Cancelada</option>
-                </select>
-            </div>
-
-            <div class="input-block" style="grid-column: span 2;">
-                <label>Notas Clínicas Opcionales</label>
-                <textarea name="notes" rows="2" placeholder="Síntomas reportados o indicaciones previas..." style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #cbd5e1; font-family: inherit;"></textarea>
-            </div>
-        </div>
-
-        <div class="form-buttons">
-            <button type="button" class="btn-action" style="background:#cbd5e1; color:#334155;" onclick="toggleFormPanel()">Cancelar</button>
-            <button type="submit" class="btn-primary-custom">Procesar Datos</button>
-        </div>
-    </form>
+        </form>
+    </div>
 </div>
 
-<div class="table-container">
-    <table class="modern-table">
+{{-- ── Tabla de citas ───────────────────────────────────────────── --}}
+<div class="table-wrap">
+    <table class="data-table" aria-label="Lista de citas médicas">
         <thead>
             <tr>
-                <th>Código ID</th>
-                <th>Fecha y Hora</th>
+                <th>ID</th>
+                <th>Fecha y hora</th>
                 <th>Paciente</th>
-                <th>Médico Asignado</th>
-                <th>Consultorio</th>
+                <th>Médico</th>
+                <th>Sala</th>
                 <th>Estado</th>
                 <th>Motivo</th>
-                <th>Acciones del Sistema</th>
+                <th>Acciones</th>
             </tr>
         </thead>
         <tbody>
             @forelse($appointments as $appointment)
             <tr>
-                <td><strong>#{{ $appointment->id }}</strong></td>
-                <td>{{ $appointment->appointment_date ? date('d/m/Y h:i A', strtotime($appointment->appointment_date)) : 'Sin fecha' }}</td>
                 <td>
-                    {{ $appointment->patient?->first_name ?? 'Paciente' }} 
-                    {{ $appointment->patient?->last_name ?? 'No Registrado' }}
+                    <span class="mono text-muted">#{{ $appointment->id }}</span>
                 </td>
-                <td>Dr(a). {{ $appointment->doctor?->last_name ?? 'Sin Asignar' }}</td>
-                <td><span style="background:#f1f5f9; padding: 4px 8px; border-radius:6px; font-size:0.85rem;">{{ $appointment->room ?? 'N/A' }}</span></td>
-                <td>
-                    @if($appointment->status == 'Pending')
-                        <span style="background:#fef3c7; color:#d97706; padding:3px 10px; border-radius:12px; font-weight:600; font-size:0.8rem;">Pendiente</span>
-                    @elseif($appointment->status == 'Confirmed')
-                        <span style="background:#dcfce7; color:#15803d; padding:3px 10px; border-radius:12px; font-weight:600; font-size:0.8rem;">Confirmada</span>
+                <td class="text-muted" style="white-space:nowrap; font-size:0.82rem;">
+                    @if($appointment->appointment_date)
+                        {{ \Carbon\Carbon::parse($appointment->appointment_date)->format('d/m/Y') }}
+                        <br>
+                        <span style="font-size:0.75rem; color:var(--text-4);">
+                            {{ \Carbon\Carbon::parse($appointment->appointment_date)->format('h:i A') }}
+                        </span>
                     @else
-                        <span style="background:#fee2e2; color:#b91c1c; padding:3px 10px; border-radius:12px; font-weight:600; font-size:0.8rem;">Cancelada</span>
+                        <span class="text-faint">Sin fecha</span>
                     @endif
                 </td>
-                <td>{{ \Illuminate\Support\Str::limit($appointment->reason, 25) }}</td>                <td>
+                <td style="font-weight:500; color:var(--text-1);">
+                    {{ $appointment->patient?->first_name ?? 'Paciente' }}
+                    {{ $appointment->patient?->last_name ?? 'no encontrado' }}
+                </td>
+                <td class="text-muted">
+                    Dr(a). {{ $appointment->doctor?->last_name ?? '—' }}
+                </td>
+                <td>
+                    <span class="badge badge-slate">
+                        {{ $appointment->room ?? 'N/A' }}
+                    </span>
+                </td>
+                <td>
+                    @if($appointment->status === 'Pending')
+                        <span class="badge badge-amber">Pendiente</span>
+                    @elseif($appointment->status === 'Confirmed')
+                        <span class="badge badge-green">Confirmada</span>
+                    @else
+                        <span class="badge badge-red">Cancelada</span>
+                    @endif
+                </td>
+                <td class="text-muted" style="max-width:140px; font-size:0.82rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                    {{ $appointment->reason ?? '—' }}
+                </td>
+                <td>
                     <div class="row-actions">
-                        <a href="{{ route('appointments.edit', $appointment->id) }}" class="btn-action act-edit" style="text-decoration:none;">Editar</a>
-                        <form action="{{ route('appointments.destroy', $appointment->id) }}" method="POST" style="display:inline;">
-                            @csrf @method('DELETE')
-                            <button type="submit" class="btn-action act-delete" onclick="return confirm('¿Retirar este registro del sistema?')">Eliminar</button>
+                        <a href="{{ route('appointments.edit', $appointment->id) }}"
+                           class="btn btn-secondary" style="padding:5px 11px; font-size:0.78rem;">
+                            Editar
+                        </a>
+                        <form action="{{ route('appointments.destroy', $appointment->id) }}"
+                              method="POST" style="display:inline;">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="btn btn-danger"
+                                    style="padding:5px 11px; font-size:0.78rem;"
+                                    onclick="return confirm('¿Eliminar esta cita del sistema?')">
+                                Eliminar
+                            </button>
                         </form>
                     </div>
                 </td>
             </tr>
             @empty
             <tr>
-                <td colspan="8" style="text-align: center; color: var(--text-muted); padding: 30px;">La base de datos de citas se encuentra vacía.</td>
+                <td class="td-empty" colspan="8">
+                    No hay citas registradas todavía.
+                </td>
             </tr>
             @endforelse
         </tbody>
     </table>
 </div>
 
-<script>
-    function toggleFormPanel() {
-        var panel = document.getElementById('formPanel');
-        panel.style.display = (panel.style.display === 'none' || panel.style.display === '') ? 'block' : 'none';
-    }
-</script>
 @endsection

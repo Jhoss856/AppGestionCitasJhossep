@@ -2,87 +2,125 @@
 
 @section('content')
 
+{{--
+|--------------------------------------------------------------------------
+| diagnoses/index.blade.php
+| Historial de diagnósticos clínicos
+|--------------------------------------------------------------------------
+--}}
+
 @if(session('success'))
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             window.showToast("{{ session('success') }}", 'success');
         });
     </script>
 @endif
 
-<div class="action-header">
-    <h2 class="page-title">Historial de Diagnósticos Clínicos</h2>
-    <div>
-        <a href="/home" class="btn-primary-custom" style="background-color: #64748b; margin-right: 10px; text-decoration: none; display: inline-flex; align-items: center;">Volver</a>
-        <button class="btn-primary-custom" onclick="toggleFormPanel()">Emitir Diagnóstico</button>
+{{-- ── Page header ──────────────────────────────────────────────── --}}
+<div class="page-header">
+    <div class="page-header__left">
+        <span class="page-eyebrow">Módulo</span>
+        <h1 class="page-title">Diagnósticos clínicos</h1>
+    </div>
+    <div class="page-header__actions">
+        <a href="/home" class="btn btn-secondary">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M19 12H5M12 5l-7 7 7 7"/>
+            </svg>
+            Volver
+        </a>
+        <button class="btn btn-primary" onclick="togglePanel('formPanel')">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M12 5v14M5 12h14"/>
+            </svg>
+            Emitir diagnóstico
+        </button>
     </div>
 </div>
 
-<div id="formPanel" class="form-card" style="display: none;">
-    <h3 class="form-title">Registrar Nuevo Diagnóstico</h3>
-    
-    <form action="{{ route('diagnoses.store') }}" method="POST">
-        @csrf
-        <div class="inputs-layout">
-            <div class="input-block">
-                <label>Paciente Evaluado</label>
-                <select name="patient_id" required style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #cbd5e1;">
-                    <option value="">-- Seleccione un paciente --</option>
-                    @foreach($patients as $patient)
-                        <option value="{{ $patient->id }}">{{ $patient->last_name }}, {{ $patient->first_name }}</option>
-                    @endforeach
-                </select>
+{{-- ── Formulario colapsable ────────────────────────────────────── --}}
+<div id="formPanel" class="form-panel">
+    <div class="card" style="margin-bottom:0;">
+        <p class="card__title">Registrar nuevo diagnóstico</p>
+
+        <form action="{{ route('diagnoses.store') }}" method="POST">
+            @csrf
+            <div class="form-grid">
+
+                <div class="form-group">
+                    <label class="form-label" for="dg_patient">Paciente evaluado</label>
+                    <select class="form-control" id="dg_patient" name="patient_id" required>
+                        <option value="">— Seleccione un paciente —</option>
+                        @foreach($patients as $patient)
+                            <option value="{{ $patient->id }}">
+                                {{ $patient->last_name }}, {{ $patient->first_name }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="dg_doctor">Médico evaluador</label>
+                    <select class="form-control" id="dg_doctor" name="doctor_id" required>
+                        <option value="">— Seleccione el especialista —</option>
+                        @foreach($doctors as $doctor)
+                            <option value="{{ $doctor->id }}">
+                                {{ $doctor->last_name }}, {{ $doctor->first_name }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="dg_date">Fecha y hora</label>
+                    <input class="form-control" type="datetime-local"
+                           id="dg_date" name="date" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="dg_type">Tipo de diagnóstico</label>
+                    <input class="form-control" type="text" id="dg_type"
+                           name="diagnosis_type" placeholder="Ej: General, Emergencia" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="dg_severity">Severidad</label>
+                    <select class="form-control" id="dg_severity" name="severity" required>
+                        <option value="Mild">Leve (Mild)</option>
+                        <option value="Moderate">Moderado (Moderate)</option>
+                        <option value="Severe">Grave (Severe)</option>
+                    </select>
+                </div>
+
+                <div class="form-group span-2">
+                    <label class="form-label" for="dg_desc">Descripción / síntomas detectados</label>
+                    <textarea class="form-control" id="dg_desc" name="description"
+                              rows="3" required></textarea>
+                </div>
+
+                <div class="form-group span-2">
+                    <label class="form-label" for="dg_rec">Recomendaciones / tratamiento</label>
+                    <textarea class="form-control" id="dg_rec" name="recommendations"
+                              rows="2"></textarea>
+                </div>
+
             </div>
 
-            <div class="input-block">
-                <label>Médico Evaluador</label>
-                <select name="doctor_id" required style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #cbd5e1;">
-                    <option value="">-- Seleccione el especialista --</option>
-                    @foreach($doctors as $doctor)
-                        <option value="{{ $doctor->id }}">{{ $doctor->last_name }}, {{ $doctor->first_name }}</option>
-                    @endforeach
-                </select>
+            <div class="form-actions">
+                <button type="button" class="btn btn-secondary"
+                        onclick="togglePanel('formPanel')">Cancelar</button>
+                <button type="submit" class="btn btn-primary">Guardar diagnóstico</button>
             </div>
-
-            <div class="input-block">
-                <label>Fecha y Hora</label>
-                <input type="datetime-local" name="date" required style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #cbd5e1;">
-            </div>
-
-            <div class="input-block">
-                <label>Tipo de Diagnóstico</label>
-                <input type="text" name="diagnosis_type" placeholder="Ej: General, Control, Emergencia" required style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #cbd5e1;">
-            </div>
-
-            <div class="input-block">
-                <label>Severidad / Gravedad</label>
-                <select name="severity" required style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #cbd5e1;">
-                    <option value="Mild">Mild (Leve)</option>
-                    <option value="Moderate">Moderate (Moderado)</option>
-                    <option value="Severe">Severe (Grave)</option>
-                </select>
-            </div>
-
-            <div class="input-block" style="grid-column: span 2;">
-                <label>Descripción / Síntomas Detectados</label>
-                <textarea name="description" rows="3" required style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #cbd5e1; font-family: inherit;"></textarea>
-            </div>
-
-            <div class="input-block" style="grid-column: span 2;">
-                <label>Recomendaciones / Tratamiento</label>
-                <textarea name="recommendations" rows="2" style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #cbd5e1; font-family: inherit;"></textarea>
-            </div>
-        </div>
-
-        <div class="form-buttons" style="margin-top: 20px;">
-            <button type="button" class="btn-action" onclick="toggleFormPanel()" style="background:#cbd5e1; color:#334155;">Cancelar</button>
-            <button type="submit" class="btn-primary-custom" style="padding: 10px 25px;">Guardar Registro</button>
-        </div>
-    </form>
+        </form>
+    </div>
 </div>
 
-<div class="table-container" style="margin-top: 20px;">
-    <table class="custom-table">
+{{-- ── Tabla ─────────────────────────────────────────────────────── --}}
+<div class="table-wrap">
+    <table class="data-table" aria-label="Historial de diagnósticos">
         <thead>
             <tr>
                 <th>ID</th>
@@ -98,44 +136,63 @@
         <tbody>
             @forelse($diagnoses as $diag)
             <tr>
-                <td><strong>#{{ $diag->id }}</strong></td>
-                <td>{{ date('d/m/Y H:i', strtotime($diag->date)) }}</td>
-                <td>{{ $diag->patient->last_name }}, {{ $diag->patient->first_name }}</td>
-                <td>Dr. {{ $diag->doctor->last_name }}</td>
-                <td><span style="background:#f1f5f9; color:#475569; padding:3px 8px; border-radius:6px; font-size:0.85rem;">{{ $diag->diagnosis_type }}</span></td>
                 <td>
-                    @if($diag->severity == 'Mild')
-                        <span style="background:#dcfce7; color:#15803d; padding:3px 10px; border-radius:12px; font-weight:600; font-size:0.8rem;">Leve</span>
-                    @elseif($diag->severity == 'Moderate')
-                        <span style="background:#fef9c3; color:#a16207; padding:3px 10px; border-radius:12px; font-weight:600; font-size:0.8rem;">Moderado</span>
+                    <span class="mono text-muted">#{{ $diag->id }}</span>
+                </td>
+                <td class="text-muted" style="font-size:0.82rem; white-space:nowrap;">
+                    {{ \Carbon\Carbon::parse($diag->date)->format('d/m/Y') }}
+                    <br>
+                    <span style="font-size:0.75rem; color:var(--text-4);">
+                        {{ \Carbon\Carbon::parse($diag->date)->format('H:i') }}
+                    </span>
+                </td>
+                <td style="font-weight:500; color:var(--text-1);">
+                    {{ $diag->patient->last_name }}, {{ $diag->patient->first_name }}
+                </td>
+                <td class="text-muted">Dr. {{ $diag->doctor->last_name }}</td>
+                <td>
+                    <span class="badge badge-slate">{{ $diag->diagnosis_type }}</span>
+                </td>
+                <td>
+                    @if($diag->severity === 'Mild')
+                        <span class="badge badge-green">Leve</span>
+                    @elseif($diag->severity === 'Moderate')
+                        <span class="badge badge-amber">Moderado</span>
                     @else
-                        <span style="background:#fee2e2; color:#b91c1c; padding:3px 10px; border-radius:12px; font-weight:600; font-size:0.8rem;">Grave</span>
+                        <span class="badge badge-red">Grave</span>
                     @endif
                 </td>
-                <td>{{ \Illuminate\Support\Str::limit($diag->description, 30) }}</td>
+                <td class="text-muted" style="max-width:160px; font-size:0.82rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                    {{ \Illuminate\Support\Str::limit($diag->description, 35) }}
+                </td>
                 <td>
                     <div class="row-actions">
-                        <a href="{{ route('diagnoses.edit', $diag->id) }}" class="btn-action act-edit" style="text-decoration:none;">Editar</a>
-                        <form action="{{ route('diagnoses.destroy', $diag->id) }}" method="POST" style="display:inline;">
-                            @csrf @method('DELETE')
-                            <button type="submit" class="btn-action act-delete" onclick="return confirm('¿Eliminar de forma permanente este diagnóstico?')">Eliminar</button>
+                        <a href="{{ route('diagnoses.edit', $diag->id) }}"
+                           class="btn btn-secondary" style="padding:5px 11px; font-size:0.78rem;">
+                            Editar
+                        </a>
+                        <form action="{{ route('diagnoses.destroy', $diag->id) }}"
+                              method="POST" style="display:inline;">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="btn btn-danger"
+                                    style="padding:5px 11px; font-size:0.78rem;"
+                                    onclick="return confirm('¿Eliminar este diagnóstico de forma permanente?')">
+                                Eliminar
+                            </button>
                         </form>
                     </div>
                 </td>
             </tr>
             @empty
             <tr>
-                <td colspan="8" style="text-align: center; color: var(--text-muted); padding: 30px;">No hay diagnósticos clínicos registrados todavía.</td>
+                <td class="td-empty" colspan="8">
+                    No hay diagnósticos registrados todavía.
+                </td>
             </tr>
             @endforelse
         </tbody>
     </table>
 </div>
 
-<script>
-    function toggleFormPanel() {
-        var panel = document.getElementById('formPanel');
-        panel.style.display = (panel.style.display === 'none' || panel.style.display === '') ? 'block' : 'none';
-    }
-</script>
 @endsection
