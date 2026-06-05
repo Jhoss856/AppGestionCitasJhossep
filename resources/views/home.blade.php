@@ -16,7 +16,7 @@
     </a>
 
     <!-- Médicos -->
-    <a href="#" class="module-box">
+    <a href="{{ route('doctors.index') }}" class="module-box">
         <div class="icon-box">🩺</div>
         <div class="module-info">
             <h3>Médicos</h3>
@@ -25,7 +25,7 @@
     </a>
 
     <!-- Citas -->
-    <a href="#" class="module-box">
+    <a href="{{ route('appointments.index') }}" class="module-box">
         <div class="icon-box">📅</div>
         <div class="module-info">
             <h3>Citas Médicas</h3>
@@ -34,7 +34,7 @@
     </a>
 
     <!-- Diagnósticos -->
-    <a href="#" class="module-box">
+    <a href="{{ route('diagnoses.index') }}" class="module-box">
         <div class="icon-box">📋</div>
         <div class="module-info">
             <h3>Diagnósticos</h3>
@@ -43,7 +43,7 @@
     </a>
 
     <!-- Tratamientos -->
-    <a href="#" class="module-box">
+    <a href="{{ route('treatments.index') }}" class="module-box">
         <div class="icon-box">💊</div>
         <div class="module-info">
             <h3>Tratamientos</h3>

@@ -7,46 +7,50 @@ use App\Models\Treatment;
 use App\Http\Requests\StoreTreatmentsRequest;
 use App\Http\Requests\UpdateTreatmentsRequest;
 use App\Http\Resources\TreatmentsResource;
+use Illuminate\Http\Request;
 
 class TreatmentController extends Controller
 {
-    // INDEX: Ordenado por el ID más reciente
-    public function index()
+    // Función para mostrar la lista (Web y API)
+    public function index(Request $request)
     {
         $treatments = Treatment::orderBy('id', 'desc')->get();
 
+        if (!$request->wantsJson()) {
+            // Retorna la vista si la petición es del navegador
+            return view('treatments.index', compact('treatments'));
+        }
+
+        // Retorna JSON si es una petición de API
         return TreatmentsResource::collection($treatments);
     }
 
+    // Guardar nuevo tratamiento
     public function store(StoreTreatmentsRequest $request)
     {
-        $treatment = Treatment::create($request->validated());
-
-        return response()->json([
-            'message' => 'Tratamiento registrado exitosamente',
-            'data'    => new TreatmentsResource($treatment)
-        ], 201);
+        Treatment::create($request->validated());
+        return redirect()->to('/treatments')->with('success', 'Tratamiento registrado con éxito.');
     }
 
-    public function show(Treatment $treatment)
+    // Cargar formulario de edición
+    public function edit($id)
     {
-        // Replicamos la carga de medicamentos que tenías en tu antiguo controlador
-        return new TreatmentsResource($treatment->load('medications'));
+        $treatment = Treatment::findOrFail($id);
+        return view('treatments.edit', compact('treatment'));
     }
 
-    public function update(UpdateTreatmentsRequest $request, Treatment $treatment)
+    // Actualizar registro
+    public function update(UpdateTreatmentsRequest $request, $id)
     {
+        $treatment = Treatment::findOrFail($id);
         $treatment->update($request->validated());
-
-        return response()->json([
-            'message' => 'Tratamiento actualizado correctamente',
-            'data'    => new TreatmentsResource($treatment)
-        ], 200);
+        return redirect()->to('/treatments')->with('success', 'Tratamiento actualizado.');
     }
 
-    public function destroy(Treatment $treatment)
+    // Eliminar registro
+    public function destroy(Request $request, $id)
     {
-        $treatment->delete();
-        return response()->json(['message' => 'Deleted successfully']);
+        Treatment::findOrFail($id)->delete();
+        return redirect()->to('/treatments')->with('success', 'Tratamiento eliminado correctamente.');
     }
 }
